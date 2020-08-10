@@ -1,35 +1,33 @@
 from flask import Flask, jsonify, abort, make_response, request
-from models import todos
+from TodosSQLite import todos
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'whisper'
+app.config['SECRET_KEY'] = 'nafiwefnp4636'
 
 
 @app.route('/api/v1/todos/', methods=['GET'])
-def todos_list_api_v1():
-    return jsonify(todos.all())
+def todos_list():
+    return jsonify(todos.select_all())
 
 
 @app.route('/api/v1/todos/<int:todo_id>', methods=['GET'])
 def get_todo(todo_id):
-    todo = todos.get(todo_id)
-    if not todo:
-        abort(404)
-    return jsonify({'todo': todo})
+    todo = todos.select_where(todo_id)
+    return jsonify(todo)
 
 
 @app.route('/api/v1/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
-    result = todos.delete(todo_id)
+    result = todos.delete_where(todo_id)
     if not result:
         abort(404)
     return jsonify({'result': result})
 
 
 @app.route('/api/v1/todos/<int:todo_id>', methods=['PUT'])
-def update_todo(todo_id):
-    todo = todos.get(todo_id)
+def update_todo(todo_id, **kwargs):
+    todo = todos.select_where(todo_id)[0]
     if not todo:
         abort(404)
     if not request.json:
@@ -38,18 +36,20 @@ def update_todo(todo_id):
     if any([
         'title' in data and not isinstance(data.get('title'), str),
         'description' in data and not isinstance(data.get('description'), str),
-        'done' in data and not isinstance(data.get('done'), bool)
+        'done' in data and not isinstance(data.get('done'), int)
     ]):
         abort(400)
 
+    if data['done']<0 or data['done']>1:
+        abort(400)
+
     todo = {
-        'title': data.get('title', todo['title']),
-        'description': data.get('description', todo['description']),
-        'done': data.get('done', todo['done']),
-        'id': todo_id
+        'title': data.get('title', todo[1]),
+        'description': data.get('description', todo[2]),
+        'done': data.get('done', todo[3])
     }
-    todos.update(todo_id, todo)
-    return jsonify({'todo': todo})
+    todos.update(todo_id, **todo)
+    return jsonify(todos.select_where(todo_id))
 
 
 @app.route('/api/v1/todos/', methods=['POST'])
@@ -60,14 +60,13 @@ def create_todo():
     if not 'title' in request.json:
         abort(400)
 
-    todo = {
-        'id': todos.all()[-1]['id'] + 1,
-        'title': request.json['title'],
-        'description': request.json.get('description', ""),
-        'done': False
-    }
-    todos.create(todo)
-    return jsonify({'todo': todo}), 201
+    todo = (
+        request.json['title'],
+        request.json.get('description', ""),
+        0
+    )
+    todos.add_todo(todo)
+    return jsonify(todos.select_all())
 
 
 @app.errorhandler(404)
