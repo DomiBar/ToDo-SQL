@@ -1,9 +1,7 @@
 from flask import Flask, jsonify, abort, make_response, request
-from TodosSQLite import todos
-
+from models.TodosSQLite import todos
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'nafiwefnp4636'
 
 
 @app.route('/api/v1/todos/', methods=['GET'])
@@ -40,7 +38,7 @@ def update_todo(todo_id, **kwargs):
     ]):
         abort(400)
 
-    if data['done']<0 or data['done']>1:
+    if data['done'] < 0 or data['done'] > 1:
         abort(400)
 
     todo = {
@@ -57,7 +55,7 @@ def create_todo():
     if not request.json:
         abort(400)
 
-    if not 'title' in request.json:
+    if 'title' not in request.json:
         abort(400)
 
     todo = (
@@ -77,9 +75,3 @@ def not_found(error):
 @app.errorhandler(400)
 def bad_request(error):
     return make_response(jsonify({'error': 'Bad request', 'status code': 400}))
-
-
-if __name__ == "__main__":
-    app.config['ENV'] = 'development'
-    app.config['JSON_AS_ASCII'] = False
-    app.run(debug=True, load_dotenv=False)

@@ -4,7 +4,7 @@ import json
 class Todos:
     def __init__(self):
         try:
-            with open("todos.json", "r") as f:
+            with open("./static/todos.json", "r") as f:
                 self.todos = json.load(f)
         except FileNotFoundError:
             self.todos = []
