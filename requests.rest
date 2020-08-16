@@ -6,18 +6,18 @@ content-type: application/json
     "description": "Zrobić trening"
 }
 ###
-GET http://localhost:5000/api/v1/todos
+GET http://localhost:5000/api/v1/todos/
 
 ###
 GET http://localhost:5000/api/v1/todos/2
 
 ###
 
-DELETE http://localhost:5000/api/v1/todos/2
+DELETE http://localhost:5000/api/v1/todos/1
 
 ###
 
-PUT http://localhost:5000/api/v1/todos/2
+PUT http://localhost:5000/api/v1/todos/1
 Content-Type: application/json
 
 {

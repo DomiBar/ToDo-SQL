@@ -1,7 +1,8 @@
 import sqlite3
 from sqlite3 import Error
+import os
 
-db_file = "./static/Todos.db"
+db_file = "..\static\Todos.db"
 
 create_todos_sql = """
     -- Todos table
